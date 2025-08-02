@@ -49,11 +49,11 @@ const ticketSchema = new schema({
     },
     assignedTo: { 
         type: schema.Types.ObjectId,
-         ref: agent,
+         ref: user,
         required: true,
      },
-     createdAt: { type: Date, default: Date.now },
-      updatedAt: { type: Date, default: Date.now }
+     createdAt: { type: Date, default: Date.now() },
+      updatedAt: { type: Date, default: Date.now() }
      });
 
 
