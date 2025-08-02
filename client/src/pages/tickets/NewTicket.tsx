@@ -1,4 +1,5 @@
-import { useState } from "react";
+// src/pages/tickets/NewTicket.tsx
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,13 +24,13 @@ import {
   Paperclip 
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { createTicket, fetchCategories } from "@/services/ticketService";
 
 interface FormData {
   subject: string;
   category: string;
-  priority: string;
+  priority: "low" | "medium" | "high" | "urgent";
   description: string;
-  attachments: File[];
 }
 
 export default function NewTicket() {
@@ -40,22 +41,13 @@ export default function NewTicket() {
     category: "",
     priority: "medium",
     description: "",
-    attachments: []
   });
-  const [isDragOver, setIsDragOver] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const totalSteps = 2;
   const progress = (currentStep / totalSteps) * 100;
-
-  const categories = [
-    "Technical Issue",
-    "Account & Billing",
-    "Feature Request",
-    "Bug Report",
-    "General Inquiry",
-    "Password Reset",
-    "Performance Issue"
-  ];
 
   const priorities = [
     { value: "low", label: "Low", color: "bg-green-100 text-green-800" },
@@ -64,46 +56,20 @@ export default function NewTicket() {
     { value: "urgent", label: "Urgent", color: "bg-red-100 text-red-800" }
   ];
 
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await fetchCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error("Failed to load categories:", error);
+      }
+    };
+    loadCategories();
+  }, []);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleFileUpload = (files: FileList | null) => {
-    if (!files) return;
-    
-    const newFiles = Array.from(files).filter(file => {
-      // Basic validation
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      return file.size <= maxSize;
-    });
-
-    setFormData(prev => ({
-      ...prev,
-      attachments: [...prev.attachments, ...newFiles]
-    }));
-  };
-
-  const removeAttachment = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      attachments: prev.attachments.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    handleFileUpload(e.dataTransfer.files);
   };
 
   const nextStep = () => {
@@ -118,10 +84,25 @@ export default function NewTicket() {
     }
   };
 
-  const handleSubmit = () => {
-    // Submit the ticket
-    console.log("Submitting ticket:", formData);
-    navigate("/dashboard");
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await createTicket({
+        subject: formData.subject,
+        description: formData.description,
+        category: formData.category,
+        priority: formData.priority as "low" | "medium" | "high" | "urgent",
+      });
+      
+      navigate("/tickets");
+    } catch (error) {
+      setError("Failed to create ticket. Please try again.");
+      console.error("Ticket creation error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const canProceed = () => {
@@ -129,13 +110,6 @@ export default function NewTicket() {
       return formData.subject.trim() && formData.category && formData.priority;
     }
     return formData.description.trim();
-  };
-
-  const getFileIcon = (file: File) => {
-    if (file.type.startsWith('image/')) {
-      return <ImageIcon className="h-4 w-4" />;
-    }
-    return <FileText className="h-4 w-4" />;
   };
 
   return (
@@ -148,7 +122,7 @@ export default function NewTicket() {
             Submit a support request and get help from our team
           </p>
         </div>
-        <Button variant="outline" onClick={() => navigate("/dashboard")}>
+        <Button variant="outline" onClick={() => navigate("/tickets")}>
           Cancel
         </Button>
       </div>
@@ -181,18 +155,25 @@ export default function NewTicket() {
                 2
               </div>
               <span className={`text-sm ${currentStep >= 2 ? "text-foreground" : "text-muted-foreground"}`}>
-                Description & Attachments
+                Description
               </span>
             </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+
       {/* Form Content */}
       <Card>
         <CardHeader>
           <CardTitle>
-            {currentStep === 1 ? "Basic Information" : "Description & Attachments"}
+            {currentStep === 1 ? "Basic Information" : "Description"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -212,7 +193,10 @@ export default function NewTicket() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="form-group">
                   <Label htmlFor="category" className="form-label">Category *</Label>
-                  <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                  <Select 
+                    value={formData.category} 
+                    onValueChange={(value) => handleInputChange("category", value)}
+                  >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
@@ -228,7 +212,10 @@ export default function NewTicket() {
 
                 <div className="form-group">
                   <Label htmlFor="priority" className="form-label">Priority *</Label>
-                  <Select value={formData.priority} onValueChange={(value) => handleInputChange("priority", value)}>
+                  <Select 
+                    value={formData.priority} 
+                    onValueChange={(value) => handleInputChange("priority", value)}
+                  >
                     <SelectTrigger className="mt-1">
                       <SelectValue />
                     </SelectTrigger>
@@ -250,76 +237,16 @@ export default function NewTicket() {
           )}
 
           {currentStep === 2 && (
-            <>
-              <div className="form-group">
-                <Label htmlFor="description" className="form-label">Description *</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Please provide a detailed description of your issue. Include steps to reproduce, error messages, and any other relevant information."
-                  value={formData.description}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
-                  className="mt-1 min-h-[120px]"
-                />
-              </div>
-
-              <div className="form-group">
-                <Label className="form-label">Attachments (Optional)</Label>
-                <div
-                  className={`mt-1 border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                    isDragOver 
-                      ? "border-primary bg-primary/5" 
-                      : "border-border hover:border-primary/50"
-                  }`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Drag and drop files here, or{" "}
-                    <label className="text-primary hover:underline cursor-pointer">
-                      browse
-                      <input
-                        type="file"
-                        multiple
-                        className="hidden"
-                        onChange={(e) => handleFileUpload(e.target.files)}
-                        accept="image/*,.pdf,.doc,.docx,.txt"
-                      />
-                    </label>
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Supports: Images, PDF, DOC, TXT (Max 10MB per file)
-                  </p>
-                </div>
-
-                {formData.attachments.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    <Label className="text-sm font-medium">Attached Files:</Label>
-                    {formData.attachments.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          {getFileIcon(file)}
-                          <div>
-                            <p className="text-sm font-medium">{file.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeAttachment(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </>
+            <div className="form-group">
+              <Label htmlFor="description" className="form-label">Description *</Label>
+              <Textarea
+                id="description"
+                placeholder="Please provide a detailed description of your issue. Include steps to reproduce, error messages, and any other relevant information."
+                value={formData.description}
+                onChange={(e) => handleInputChange("description", e.target.value)}
+                className="mt-1 min-h-[200px]"
+              />
+            </div>
           )}
 
           {/* Navigation */}
@@ -344,9 +271,9 @@ export default function NewTicket() {
             ) : (
               <Button 
                 onClick={handleSubmit}
-                disabled={!canProceed()}
+                disabled={!canProceed() || loading}
               >
-                Submit Ticket
+                {loading ? "Submitting..." : "Submit Ticket"}
               </Button>
             )}
           </div>

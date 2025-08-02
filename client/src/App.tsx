@@ -11,6 +11,8 @@ import Analytics from "./pages/admin/Analytics";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import NotFound from "./pages/NotFound";
+import TicketsList from "./pages/tickets/ticketList";
+import TicketDetail from "./pages/tickets/TicketDetail";
 
 const queryClient = new QueryClient();
 
@@ -23,19 +25,21 @@ const App = () => (
         <Routes>
           {/* Redirect root to dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
+
           {/* Auth routes */}
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/register" element={<Register />} />
-          
+
           {/* App routes with layout */}
           <Route path="/" element={<AppLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="tickets/new" element={<NewTicket />} />
+            <Route path="/tickets" element={<TicketsList />} />
+            <Route path="/tickets/new" element={<NewTicket />} />
+            <Route path="/tickets/:id" element={<TicketDetail />} />
             <Route path="admin/users" element={<UserManagement />} />
             <Route path="admin/reports" element={<Analytics />} />
           </Route>
-          
+
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>

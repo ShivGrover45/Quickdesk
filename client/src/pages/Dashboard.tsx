@@ -21,6 +21,7 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Mock data
 const mockTickets: Ticket[] = [
@@ -36,9 +37,6 @@ const mockTickets: Ticket[] = [
     createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 mins ago
     updatedAt: new Date(Date.now() - 1000 * 60 * 15), // 15 mins ago
     commentsCount: 3,
-    upvotes: 5,
-    downvotes: 1,
-    userVote: "up"
   },
   {
     id: "2", 
@@ -52,8 +50,6 @@ const mockTickets: Ticket[] = [
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
     updatedAt: new Date(Date.now() - 1000 * 60 * 45), // 45 mins ago
     commentsCount: 7,
-    upvotes: 12,
-    downvotes: 0
   },
   {
     id: "3",
@@ -67,8 +63,6 @@ const mockTickets: Ticket[] = [
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
     updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
     commentsCount: 4,
-    upvotes: 8,
-    downvotes: 2
   }
 ];
 
@@ -104,6 +98,7 @@ const stats = [
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate(); // Add this hook
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -122,6 +117,11 @@ export default function Dashboard() {
     // Implementation would update the ticket vote
   };
 
+  // Add this function to handle new ticket creation
+  const handleNewTicket = () => {
+    navigate("/tickets/new"); // Navigate to the new ticket page
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -132,7 +132,8 @@ export default function Dashboard() {
             Welcome back! Here's what's happening with your support tickets.
           </p>
         </div>
-        <Button>
+        {/* Update this button to use the handleNewTicket function */}
+        <Button onClick={handleNewTicket}>
           <Plus className="h-4 w-4 mr-2" />
           New Ticket
         </Button>
@@ -219,7 +220,6 @@ export default function Dashboard() {
                 <TicketCard
                   key={ticket.id}
                   ticket={ticket}
-                  onVote={handleVote}
                   onClick={() => console.log(`Viewing ticket ${ticket.id}`)}
                   showAssignee={true}
                 />
@@ -241,7 +241,6 @@ export default function Dashboard() {
                 <TicketCard
                   key={ticket.id}
                   ticket={ticket}
-                  onVote={handleVote}
                   onClick={() => console.log(`Viewing ticket ${ticket.id}`)}
                   showAssignee={true}
                 />

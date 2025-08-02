@@ -1,9 +1,9 @@
+// src/components/tickets/TicketCard.tsx
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatusBadge, TicketStatus } from "./StatusBadge";
-import { ChevronUp, ChevronDown, MessageCircle, Clock, User } from "lucide-react";
+import { MessageCircle, Clock, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 export interface Ticket {
@@ -24,14 +24,10 @@ export interface Ticket {
   createdAt: Date;
   updatedAt: Date;
   commentsCount: number;
-  upvotes: number;
-  downvotes: number;
-  userVote?: "up" | "down";
 }
 
 interface TicketCardProps {
   ticket: Ticket;
-  onVote?: (ticketId: string, vote: "up" | "down") => void;
   onClick?: () => void;
   showAssignee?: boolean;
 }
@@ -43,11 +39,7 @@ const priorityColors = {
   urgent: "bg-red-100 text-red-800"
 };
 
-export function TicketCard({ ticket, onVote, onClick, showAssignee = false }: TicketCardProps) {
-  const handleVote = (vote: "up" | "down") => {
-    onVote?.(ticket.id, vote);
-  };
-
+export function TicketCard({ ticket, onClick, showAssignee = false }: TicketCardProps) {
   return (
     <Card className="card-hover cursor-pointer" onClick={onClick}>
       <CardHeader className="pb-3">
@@ -104,37 +96,10 @@ export function TicketCard({ ticket, onVote, onClick, showAssignee = false }: Ti
               {ticket.category}
             </Badge>
           </div>
-
-          {/* Right side - Voting */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleVote("up");
-              }}
-              className={ticket.userVote === "up" ? "text-green-600 bg-green-50" : ""}
-            >
-              <ChevronUp className="h-4 w-4" />
-              <span className="text-xs">{ticket.upvotes}</span>
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleVote("down");
-              }}
-              className={ticket.userVote === "down" ? "text-red-600 bg-red-50" : ""}
-            >
-              <ChevronDown className="h-4 w-4" />
-              <span className="text-xs">{ticket.downvotes}</span>
-            </Button>
-          </div>
         </div>
       </CardContent>
     </Card>
   );
 }
+
+export type { TicketStatus };
