@@ -1,7 +1,7 @@
 import express from "express";
 import connectDB from "./database/mongodb.js";
 import authRouter from "./router/auth.router.js";
-import cors from "cors";
+
 
 const app = express();
 app.use(cors());
