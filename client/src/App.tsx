@@ -11,7 +11,7 @@ import Analytics from "./pages/admin/Analytics";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import NotFound from "./pages/NotFound";
-import TicketsList from "./pages/tickets/ticketList";
+import TicketsList from "./pages/tickets/TicketList";
 import TicketDetail from "./pages/tickets/TicketDetail";
 
 const queryClient = new QueryClient();
