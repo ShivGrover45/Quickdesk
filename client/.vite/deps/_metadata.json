@@ -1,4 +1,12 @@
 {
+<<<<<<< HEAD
+  "hash": "405e78fa",
+  "configHash": "56fbc366",
+  "lockfileHash": "e3b0c442",
+  "browserHash": "5486521b",
+  "optimized": {},
+  "chunks": {}
+=======
   "hash": "44fe3fd1",
   "configHash": "56fbc366",
   "lockfileHash": "2b3fdcb5",
@@ -64,4 +72,5 @@
       "file": "chunk-WOOG5QLI.js"
     }
   }
+>>>>>>> 103474fe29dfce35896eff936e544df644a8f983
 }

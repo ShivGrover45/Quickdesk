@@ -8,10 +8,9 @@ router.post('/login',signIn);
 
 router.get('/:id',getUser);
 
-<<<<<<< HEAD
+
 router.patch('/:id',updatedUser);
-=======
+
 router.patch('/:id',updatedUser);
 
 export default router;
->>>>>>> frontend/aditya
