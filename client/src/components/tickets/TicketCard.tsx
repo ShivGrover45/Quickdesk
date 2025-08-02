@@ -1,0 +1,105 @@
+// src/components/tickets/TicketCard.tsx
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { StatusBadge, TicketStatus } from "./StatusBadge";
+import { MessageCircle, Clock, User } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+
+export interface Ticket {
+  id: string;
+  subject: string;
+  description: string;
+  status: TicketStatus;
+  priority: "low" | "medium" | "high" | "urgent";
+  category: string;
+  assignee?: {
+    name: string;
+    avatar?: string;
+  };
+  requester: {
+    name: string;
+    avatar?: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+  commentsCount: number;
+}
+
+interface TicketCardProps {
+  ticket: Ticket;
+  onClick?: () => void;
+  showAssignee?: boolean;
+}
+
+const priorityColors = {
+  low: "bg-green-100 text-green-800",
+  medium: "bg-yellow-100 text-yellow-800", 
+  high: "bg-orange-100 text-orange-800",
+  urgent: "bg-red-100 text-red-800"
+};
+
+export function TicketCard({ ticket, onClick, showAssignee = false }: TicketCardProps) {
+  return (
+    <Card className="card-hover cursor-pointer" onClick={onClick}>
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-foreground truncate">
+              {ticket.subject}
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+              {ticket.description}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <StatusBadge status={ticket.status} />
+            <Badge className={priorityColors[ticket.priority]}>
+              {ticket.priority}
+            </Badge>
+          </div>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="pt-0">
+        <div className="flex items-center justify-between">
+          {/* Left side - User info and metadata */}
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-6 w-6">
+                <AvatarImage src={ticket.requester.avatar} />
+                <AvatarFallback className="text-xs">
+                  {ticket.requester.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span>{ticket.requester.name}</span>
+            </div>
+            
+            {showAssignee && ticket.assignee && (
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>{ticket.assignee.name}</span>
+              </div>
+            )}
+            
+            <div className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              <span>{formatDistanceToNow(ticket.updatedAt, { addSuffix: true })}</span>
+            </div>
+            
+            <div className="flex items-center gap-1">
+              <MessageCircle className="h-4 w-4" />
+              <span>{ticket.commentsCount}</span>
+            </div>
+            
+            <Badge variant="outline" className="text-xs">
+              {ticket.category}
+            </Badge>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export type { TicketStatus };
