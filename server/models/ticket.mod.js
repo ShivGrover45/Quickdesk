@@ -36,9 +36,26 @@ const ticketSchema = new schema({
         default:"pending"
     },
     //priority of the ticket 
-    prior
+    priority:{
+        type:String,
+        required:true,
+        enum:["low","medium","high"],
+        default:"medium"
+    },
+    createdBy:{
+        type:schema.Types.ObjectId,
+        ref:user,
+        required:true,
+    },
+    assignedTo: { 
+        type: schema.Types.ObjectId,
+         ref: agent,
+        required: true,
+     },
+     createdAt: { type: Date, default: Date.now },
+      updatedAt: { type: Date, default: Date.now }
+     });
 
-})
 
 const ticketModel = mongoose.model("Ticket", ticketSchema);
 export default ticketModel;
