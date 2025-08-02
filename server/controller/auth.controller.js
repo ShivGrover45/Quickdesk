@@ -47,7 +47,7 @@ export const signIn=async(req,res,next)=>{
          error.statusCode=403
          throw error
       }
-      const token= jwt.sign({user_id:user._id},JWT_SECRET_KEY,{expiresIn:JWT_EXPIRES_IN})
+      const token= jwt.sign({user_id:user._id},"secret",{expiresIn:'1d'})
       res.status(200).json({
             success:true,
             message:"Verification Successfull",
