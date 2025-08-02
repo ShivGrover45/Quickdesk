@@ -6,8 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Mail, Lock, User, Building } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Building, AlertCircle } from "lucide-react";
 import quickdeskLogo from "@/assets/quickdesk-logo.png";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,14 +26,32 @@ export default function Register() {
     email: "",
     password: "",
     confirmPassword: "",
-    agreeTerms: false
+    agreeTerms: false,
+    role: "end-user", // Default role
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showRoleRequest, setShowRoleRequest] = useState(false);
+  const [roleRequestSent, setRoleRequestSent] = useState(false);
   const navigate = useNavigate();
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Show role request button if role is changed from default
+    if (field === "role" && value !== "end-user") {
+      setShowRoleRequest(true);
+      setRoleRequestSent(false);
+    } else if (field === "role" && value === "end-user") {
+      setShowRoleRequest(false);
+    }
+  };
+
+  const handleRoleRequest = () => {
+    // In a real app, this would send a request to the backend
+    console.log(`Role change request sent for ${formData.role}`);
+    setRoleRequestSent(true);
+    setShowRoleRequest(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,28 +77,26 @@ export default function Register() {
     setError("");
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: `${formData.firstName} ${formData.lastName}`, // Combine first and last name
-          email: formData.email,
-          password: formData.password,
-          company: formData.company
-        }),
+      // For demo purposes, we'll just log the data
+      console.log("Registration data:", {
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        password: formData.password,
+        company: formData.company,
+        role: formData.role,
+        roleRequested: formData.role !== "end-user"
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
-      }
-
-      // Store token and user data
-      localStorage.setItem('token', data.data.token);
-      localStorage.setItem('user', JSON.stringify(data.data.user));
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // For demo, just store basic user data
+      localStorage.setItem('user', JSON.stringify({
+        id: Math.random().toString(36).substring(7),
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        role: "end-user" // Always register as end-user initially
+      }));
       
       // Redirect to dashboard
       navigate('/dashboard');
@@ -101,13 +124,13 @@ export default function Register() {
               <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
                 <span className="text-sm">✓</span>
               </div>
-              <span>Free 14-day trial</span>
+              <span>Free of cost Service</span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
                 <span className="text-sm">✓</span>
               </div>
-              <span>No credit card required</span>
+              <span>We hear you</span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -119,7 +142,6 @@ export default function Register() {
         </div>
       </div>
 
-      {/* Right side - Register Form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
@@ -207,6 +229,43 @@ export default function Register() {
                       className="pl-10"
                     />
                   </div>
+                </div>
+
+                {/* Role selection */}
+                <div className="form-group">
+                  <Label htmlFor="role" className="form-label">Role*</Label>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(value) => handleInputChange("role", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="end-user">End User</SelectItem>
+                      <SelectItem value="support-agent">Support Agent</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {showRoleRequest && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRoleRequest}
+                        disabled={roleRequestSent}
+                      >
+                        {roleRequestSent ? "Request Sent" : "Request Role Change"}
+                      </Button>
+                      {roleRequestSent && (
+                        <span className="text-sm text-muted-foreground flex items-center gap-1">
+                          <AlertCircle className="h-4 w-4" />
+                          Admin approval required
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Password fields */}
