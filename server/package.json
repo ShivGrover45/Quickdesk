@@ -11,14 +11,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-<<<<<<< HEAD
-    "multer": "^2.0.2"
-=======
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.17.0"
->>>>>>> frontend/aditya
+    "mongoose": "^8.17.0",
+    "multer": "^2.0.2"
   }
 }
