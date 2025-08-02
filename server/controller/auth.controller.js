@@ -58,3 +58,40 @@ export const signIn=async(req,res,next)=>{
       next(error)
    }
 }
+
+export const getUser=async(req,res,next)=>{
+   try{
+      const user=await userModel.findById(req.params.id)
+      if(!user){
+         const error=new Error("User not found")
+         error.statusCode=404
+         throw error
+      }
+      res.status(200).json({
+         success:true,
+         message:"User fetched successfully",
+         data:user
+      })
+   }catch(error){
+      console.log(error.message)
+      next(error)
+   }
+}
+export const updatedUser=async(req,res,next)=>{
+   try{
+    const id=req.params.id
+    const {username,email,avatar}=req.body
+    const user=await userModel.findOne({id})
+    if(!user){
+      const error=new Error("User not found")
+      error.statusCode=404
+      throw error
+    }
+    const updatedUser=await userModel.findByIdAndUpdate(id,{
+      username,email,avatar,updatedAt:Date.now()
+    },{new:true})
+   }catch(error){
+      console.log(error.message)
+      next(error)
+   }
+}
