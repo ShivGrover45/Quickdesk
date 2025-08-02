@@ -5,6 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "type": "module",
   "author": "Shiv Grover",
   "license": "ISC",
   "dependencies": {
@@ -12,7 +13,6 @@
     "mongodb": "^6.18.0",
     "mongoose": "^8.17.0"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ShivGrover45/Quickdesk.git"
